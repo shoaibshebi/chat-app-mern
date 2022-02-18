@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import querystring from "query-string";
 import io from "socket.io-client";
+import { useLocation } from 'react-router-dom'
+  
 import "./chat.css";
 import InfoBar from "../infobar/infobar";
 import Input from "../input/input";
@@ -11,20 +13,16 @@ const ENDPOINT = "localhost:5000";
 let socket;
 
 // WHEN NEW PERSON JOIN CHAT ,/Chat INVOKE AND COMPNENT MOUNT THEN USEEFFECT() RUNS
-const Chat = ({ location }) => {
-  //location actuly coms from router
+const Chat = () => {
   const [name, setName] = useState("");
   const [room, setRoom] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
-  //didMount , didUpdate, willUnmount
+  const location = useLocation();
+
   useEffect(() => {
-    // const data=querystring.parse(location.search);
     const { name, room } = querystring.parse(location.search);
-    // console.log(location);
-    // console.log(data);
-    // console.log(name);
     setName(name);
     setRoom(room);
 
@@ -35,12 +33,11 @@ const Chat = ({ location }) => {
       alert(error);
     });
 
-    //return invoke when component willUnmount
     return () => {
       socket.emit("disconnect");
       socket.off();
     };
-  }, [location.search]);
+  },[location.search]);
 
   useEffect(() => {
     socket.on("message", (message) => {
@@ -50,15 +47,11 @@ const Chat = ({ location }) => {
 
   const sendMessage = (e) => {
     e.preventDefault();
-
     if (message) {
       console.log("in the send mesaage ");
       socket.emit("sendMessage", message, () => setMessage(""));
     }
   };
-
-  // console.log(messages);
-  console.log(message, messages);
 
   return (
     <div className="outerContainer">
@@ -75,4 +68,4 @@ const Chat = ({ location }) => {
   );
 };
 
-export default Chat;
+export default (Chat);
